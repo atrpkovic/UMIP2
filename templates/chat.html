@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UMIP 2.0 - Priority Tire Marketing Intelligence</title>
+    <link rel="icon" type="image/png" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR23H4FKwnIX7I8zPuJHaeum7CUc6Ko2wOO-A&s">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Left Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>Query History</h2>
+                <div class="sidebar-actions">
+                    <button class="new-chat-btn" id="new-chat-btn" title="New chat">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 5v14M5 12h14"/>
+                        </svg>
+                    </button>
+                    <button class="clear-all-btn" id="clear-history-btn" title="Clear all history">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="sidebar-content" id="history-list">
+                <!-- History items populated by JS -->
+            </div>
+            <div class="downloads-section">
+                <div class="downloads-header">Downloads</div>
+                <div id="downloads-list">
+                    <div class="no-downloads">No downloads yet</div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <header>
+                <div class="header-left">
+                    <button class="sidebar-toggle" id="sidebar-toggle" title="Toggle sidebar">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 12h18M3 6h18M3 18h18"/>
+                        </svg>
+                    </button>
+                    <div class="logo">
+                        <h1><span>UMIP</span> 2.0</h1>
+                    </div>
+                    <span class="subtitle">Priority Tire Marketing Intelligence</span>
+                </div>
+                <div class="header-right">
+                    <button class="theme-toggle" id="theme-toggle" title="Toggle theme">
+                        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                        </svg>
+                        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                        </svg>
+                    </button>
+                </div>
+            </header>
+            
+            <main id="messages">
+                <div class="message assistant">
+                    <div class="message-content">
+                        Hi! I'm your marketing data assistant. Ask me anything about your 
+                        Google Shopping data, GA4 analytics, ad campaigns, inventory, or SEO rankings.
+                    </div>
+                </div>
+            </main>
+            
+            <footer>
+                <form id="chat-form">
+                    <input 
+                        type="text" 
+                        id="user-input" 
+                        placeholder="Ask a question about your data..."
+                        autocomplete="off"
+                    >
+                    <button type="submit" id="send-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2"/>
+                        </svg>
+                    </button>
+                </form>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Data Panel (slides in from right) -->
+    <div class="data-panel" id="data-panel">
+        <div class="data-panel-header">
+            <h3>Data View <span id="data-row-count"></span></h3>
+            <div class="data-panel-actions">
+                <button class="panel-btn" id="copy-data-btn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                    </svg>
+                    Copy
+                </button>
+                <button class="panel-btn primary" id="download-csv-btn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+                    </svg>
+                    Download CSV
+                </button>
+                <button class="panel-close" id="panel-close">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div class="data-panel-content">
+            <div class="data-table-container" id="data-table-container">
+                <!-- Table populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- SQL Modal -->
+    <div class="sql-modal" id="sql-modal">
+        <div class="sql-modal-header">
+            <h3>SQL Query</h3>
+            <button class="sql-modal-close" id="sql-modal-close">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <pre><code id="sql-content"></code></pre>
+    </div>
+
+    <!-- Chart Modal -->
+    <div class="chart-modal" id="chart-modal">
+        <div class="chart-modal-header">
+            <h3 id="chart-title">Seasonality Trend</h3>
+            <button class="chart-modal-close" id="chart-modal-close">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <div class="chart-container">
+            <canvas id="seasonality-chart"></canvas>
+        </div>
+    </div>
+
+    <!-- Overlay -->
+    <div class="overlay" id="overlay"></div>
+
+    <script>
+        // State
+        let currentData = null;
+        let currentSql = null;
+        let currentChart = null;
+        let queryHistory = JSON.parse(localStorage.getItem('queryHistory') || '[]');
+        let downloads = JSON.parse(localStorage.getItem('downloads') || '[]');
+
+        // DOM Elements
+        const messagesDiv = document.getElementById('messages');
+        const chatForm = document.getElementById('chat-form');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+        const themeToggle = document.getElementById('theme-toggle');
+        const dataPanel = document.getElementById('data-panel');
+        const panelClose = document.getElementById('panel-close');
+        const overlay = document.getElementById('overlay');
+        const sqlModal = document.getElementById('sql-modal');
+        const sqlModalClose = document.getElementById('sql-modal-close');
+        const sqlContent = document.getElementById('sql-content');
+        const chartModal = document.getElementById('chart-modal');
+        const chartModalClose = document.getElementById('chart-modal-close');
+        const chartTitle = document.getElementById('chart-title');
+        const historyList = document.getElementById('history-list');
+        const downloadsList = document.getElementById('downloads-list');
+        const dataTableContainer = document.getElementById('data-table-container');
+        const dataRowCount = document.getElementById('data-row-count');
+        const downloadCsvBtn = document.getElementById('download-csv-btn');
+        const copyDataBtn = document.getElementById('copy-data-btn');
+
+        // Initialize theme
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+
+        // Theme toggle
+        themeToggle.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+        });
+
+        // Sidebar toggle
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+        });
+
+        // Panel close
+        panelClose.addEventListener('click', closeDataPanel);
+        overlay.addEventListener('click', () => {
+            closeDataPanel();
+            closeSqlModal();
+            closeChartModal();
+        });
+
+        // SQL Modal
+        sqlModalClose.addEventListener('click', closeSqlModal);
+
+        function closeSqlModal() {
+            sqlModal.classList.remove('active');
+            overlay.classList.remove('active');
+        }
+
+        // Chart Modal
+        chartModalClose.addEventListener('click', closeChartModal);
+
+        function closeChartModal() {
+            chartModal.classList.remove('active');
+            overlay.classList.remove('active');
+        }
+
+        function closeDataPanel() {
+            dataPanel.classList.remove('active');
+            overlay.classList.remove('active');
+        }
+
+        // Detect if data is chartable (has date/time + numeric columns)
+        function detectChartableData(data) {
+            if (!data || data.length < 2) return null;
+            
+            const columns = Object.keys(data[0]);
+            
+            // Look for date/time columns
+            const dateColumns = columns.filter(col => 
+                /date|time|month|week|year|period|quarter/i.test(col)
+            );
+            
+            // Look for numeric columns suitable for charting
+            const numericColumns = columns.filter(col => {
+                if (dateColumns.includes(col)) return false;
+                const sample = data[0][col];
+                return typeof sample === 'number' || 
+                       (typeof sample === 'string' && !isNaN(parseFloat(sample)));
+            });
+            
+            // Check for specific patterns
+            const hasInterest = columns.some(c => /interest|trend|volume|index/i.test(c));
+            const hasSeasonality = columns.some(c => /season|month|week/i.test(c));
+            
+            if (dateColumns.length > 0 && numericColumns.length > 0) {
+                return {
+                    type: hasInterest || hasSeasonality ? 'seasonality' : 'timeseries',
+                    dateColumn: dateColumns[0],
+                    valueColumns: numericColumns.slice(0, 3), // Max 3 series
+                    labelColumn: columns.find(c => /keyword|name|label|campaign/i.test(c))
+                };
+            }
+            
+            // Check for monthly seasonality pattern (MONTH + value)
+            const monthCol = columns.find(c => /^month$/i.test(c));
+            if (monthCol && numericColumns.length > 0) {
+                return {
+                    type: 'monthly',
+                    dateColumn: monthCol,
+                    valueColumns: numericColumns.slice(0, 3),
+                    labelColumn: columns.find(c => /keyword|name|label/i.test(c))
+                };
+            }
+            
+            return null;
+        }
+
+        // Render chart
+        function renderChart(data, chartConfig, title = 'Trend Analysis') {
+            chartTitle.textContent = title;
+            
+            // Destroy existing chart
+            if (currentChart) {
+                currentChart.destroy();
+            }
+            
+            const ctx = document.getElementById('seasonality-chart').getContext('2d');
+            
+            // Prepare data
+            let labels, datasets;
+            
+            if (chartConfig.type === 'monthly') {
+                // Sort by month
+                const monthOrder = ['January', 'February', 'March', 'April', 'May', 'June', 
+                                   'July', 'August', 'September', 'October', 'November', 'December'];
+                const monthAbbr = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                                  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                
+                // Group by keyword if present
+                if (chartConfig.labelColumn) {
+                    const grouped = {};
+                    data.forEach(row => {
+                        const keyword = row[chartConfig.labelColumn];
+                        if (!grouped[keyword]) grouped[keyword] = {};
+                        const monthIdx = typeof row[chartConfig.dateColumn] === 'number' 
+                            ? row[chartConfig.dateColumn] - 1
+                            : monthOrder.findIndex(m => m.toLowerCase().startsWith(String(row[chartConfig.dateColumn]).toLowerCase()));
+                        if (monthIdx >= 0) {
+                            grouped[keyword][monthIdx] = parseFloat(row[chartConfig.valueColumns[0]]) || 0;
+                        }
+                    });
+                    
+                    labels = monthAbbr;
+                    datasets = Object.entries(grouped).slice(0, 5).map(([keyword, values], idx) => ({
+                        label: keyword,
+                        data: monthAbbr.map((_, i) => values[i] || 0),
+                        borderColor: getChartColor(idx),
+                        backgroundColor: getChartColor(idx, 0.1),
+                        tension: 0.3,
+                        fill: false
+                    }));
+                } else {
+                    labels = data.map(row => {
+                        const m = row[chartConfig.dateColumn];
+                        return typeof m === 'number' ? monthAbbr[m - 1] : m;
+                    });
+                    datasets = chartConfig.valueColumns.map((col, idx) => ({
+                        label: col,
+                        data: data.map(row => parseFloat(row[col]) || 0),
+                        borderColor: getChartColor(idx),
+                        backgroundColor: getChartColor(idx, 0.1),
+                        tension: 0.3,
+                        fill: idx === 0
+                    }));
+                }
+            } else {
+                // Time series
+                const sortedData = [...data].sort((a, b) => 
+                    new Date(a[chartConfig.dateColumn]) - new Date(b[chartConfig.dateColumn])
+                );
+                
+                // Group by keyword if present
+                if (chartConfig.labelColumn) {
+                    const grouped = {};
+                    sortedData.forEach(row => {
+                        const keyword = row[chartConfig.labelColumn];
+                        if (!grouped[keyword]) grouped[keyword] = [];
+                        grouped[keyword].push({
+                            date: row[chartConfig.dateColumn],
+                            value: parseFloat(row[chartConfig.valueColumns[0]]) || 0
+                        });
+                    });
+                    
+                    // Get all unique dates
+                    const allDates = [...new Set(sortedData.map(r => r[chartConfig.dateColumn]))].sort();
+                    labels = allDates.map(d => formatDate(d));
+                    
+                    datasets = Object.entries(grouped).slice(0, 5).map(([keyword, values], idx) => {
+                        const valueMap = {};
+                        values.forEach(v => valueMap[v.date] = v.value);
+                        return {
+                            label: keyword,
+                            data: allDates.map(d => valueMap[d] || 0),
+                            borderColor: getChartColor(idx),
+                            backgroundColor: getChartColor(idx, 0.1),
+                            tension: 0.3,
+                            fill: false
+                        };
+                    });
+                } else {
+                    labels = sortedData.map(row => formatDate(row[chartConfig.dateColumn]));
+                    datasets = chartConfig.valueColumns.map((col, idx) => ({
+                        label: col,
+                        data: sortedData.map(row => parseFloat(row[col]) || 0),
+                        borderColor: getChartColor(idx),
+                        backgroundColor: getChartColor(idx, 0.1),
+                        tension: 0.3,
+                        fill: idx === 0
+                    }));
+                }
+            }
+            
+            currentChart = new Chart(ctx, {
+                type: 'line',
+                data: { labels, datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim()
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim()
+                            },
+                            grid: {
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--border-color').trim()
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim()
+                            },
+                            grid: {
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--border-color').trim()
+                            }
+                        }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
+                    }
+                }
+            });
+            
+            chartModal.classList.add('active');
+            overlay.classList.add('active');
+        }
+        
+        function getChartColor(index, alpha = 1) {
+            const colors = [
+                `rgba(242, 166, 29, ${alpha})`,   // Priority Tire orange
+                `rgba(59, 130, 246, ${alpha})`,   // Blue
+                `rgba(16, 185, 129, ${alpha})`,   // Green
+                `rgba(239, 68, 68, ${alpha})`,    // Red
+                `rgba(139, 92, 246, ${alpha})`    // Purple
+            ];
+            return colors[index % colors.length];
+        }
+        
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            const d = new Date(dateStr);
+            if (isNaN(d)) return dateStr;
+            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }
+
+        function openChartModal(data, title) {
+            const chartConfig = detectChartableData(data);
+            if (chartConfig) {
+                renderChart(data, chartConfig, title);
+            }
+        }
+
+        function openDataPanel(data) {
+            currentData = data;
+            dataRowCount.textContent = `(${data.length} rows)`;
+            dataTableContainer.innerHTML = createTable(data);
+            dataPanel.classList.add('active');
+            overlay.classList.add('active');
+        }
+
+        function openSqlModal(sql) {
+            sqlContent.textContent = sql;
+            sqlModal.classList.add('active');
+            overlay.classList.add('active');
+        }
+
+        // Render history
+        function renderHistory() {
+            if (queryHistory.length === 0) {
+                historyList.innerHTML = '<div class="no-downloads" style="padding: 12px;">No queries yet</div>';
+                return;
+            }
+            historyList.innerHTML = queryHistory.slice().reverse().map((item, idx) => {
+                const realIdx = queryHistory.length - 1 - idx;
+                return `
+                <div class="history-item" data-idx="${realIdx}">
+                    <div class="history-item-content">
+                        <div class="query">${escapeHtml(item.query)}</div>
+                        <div class="time">${item.time}</div>
+                    </div>
+                    <button class="history-delete" data-idx="${realIdx}" title="Delete">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 6L6 18M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            `}).join('');
+            
+            // Click to load conversation
+            historyList.querySelectorAll('.history-item-content').forEach(el => {
+                el.addEventListener('click', () => {
+                    const idx = parseInt(el.closest('.history-item').dataset.idx);
+                    loadConversation(idx);
+                });
+            });
+            
+            // Delete individual
+            historyList.querySelectorAll('.history-delete').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const idx = parseInt(btn.dataset.idx);
+                    queryHistory.splice(idx, 1);
+                    localStorage.setItem('queryHistory', JSON.stringify(queryHistory));
+                    renderHistory();
+                });
+            });
+        }
+        
+        // Load a past conversation into the chat
+        function loadConversation(idx) {
+            const item = queryHistory[idx];
+            if (!item) return;
+            
+            // Clear current messages except the welcome message
+            messagesDiv.innerHTML = `
+                <div class="message assistant">
+                    <div class="message-content">
+                        Hi! I'm your marketing data assistant. Ask me anything about your 
+                        Google Shopping data, GA4 analytics, ad campaigns, inventory, or SEO rankings.
+                    </div>
+                </div>
+            `;
+            
+            // Add the user message
+            addMessage(item.query, 'user');
+            
+            // Add the assistant response with chart detection
+            if (item.answer) {
+                addMessage(item.answer, 'assistant', item.sql, item.data);
+            }
+            
+            // Highlight active history item
+            historyList.querySelectorAll('.history-item').forEach(el => {
+                el.classList.remove('active');
+                if (parseInt(el.dataset.idx) === idx) {
+                    el.classList.add('active');
+                }
+            });
+        }
+        
+        // Clear all history
+        function clearAllHistory() {
+            if (confirm('Delete all query history?')) {
+                queryHistory = [];
+                localStorage.setItem('queryHistory', JSON.stringify(queryHistory));
+                renderHistory();
+            }
+        }
+
+        // Render downloads
+        function renderDownloads() {
+            if (downloads.length === 0) {
+                downloadsList.innerHTML = '<div class="no-downloads">No downloads yet</div>';
+                return;
+            }
+            downloadsList.innerHTML = downloads.slice().reverse().slice(0, 5).map(d => `
+                <div class="download-item" data-url="${d.url}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8"/>
+                    </svg>
+                    <span class="name">${escapeHtml(d.name)}</span>
+                    <span class="size">${d.size}</span>
+                </div>
+            `).join('');
+            
+            downloadsList.querySelectorAll('.download-item').forEach(el => {
+                el.addEventListener('click', () => {
+                    const a = document.createElement('a');
+                    a.href = el.dataset.url;
+                    a.download = '';
+                    a.click();
+                });
+            });
+        }
+
+        // Add to history (now stores full conversation)
+        function addToHistory(query, answer = null, sql = null, data = null) {
+            const now = new Date();
+            const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            queryHistory.push({ query, answer, sql, data, time });
+            if (queryHistory.length > 50) queryHistory.shift();
+            localStorage.setItem('queryHistory', JSON.stringify(queryHistory));
+            renderHistory();
+        }
+
+        // Download CSV
+        downloadCsvBtn.addEventListener('click', () => {
+            if (!currentData || currentData.length === 0) return;
+            
+            const headers = Object.keys(currentData[0]);
+            const csvRows = [headers.join(',')];
+            
+            for (const row of currentData) {
+                const values = headers.map(h => {
+                    const val = row[h] ?? '';
+                    return `"${String(val).replace(/"/g, '""')}"`;
+                });
+                csvRows.push(values.join(','));
+            }
+            
+            const csvString = csvRows.join('\n');
+            const blob = new Blob([csvString], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const filename = `umip-export-${Date.now()}.csv`;
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            
+            // Add to downloads
+            const size = (blob.size / 1024).toFixed(1) + ' KB';
+            downloads.push({ name: filename, url, size });
+            if (downloads.length > 10) downloads.shift();
+            localStorage.setItem('downloads', JSON.stringify(downloads));
+            renderDownloads();
+        });
+
+        // Copy data
+        copyDataBtn.addEventListener('click', () => {
+            if (!currentData || currentData.length === 0) return;
+            
+            const headers = Object.keys(currentData[0]);
+            const rows = [headers.join('\t')];
+            
+            for (const row of currentData) {
+                rows.push(headers.map(h => row[h] ?? '').join('\t'));
+            }
+            
+            navigator.clipboard.writeText(rows.join('\n'));
+            copyDataBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> Copied!';
+            setTimeout(() => {
+                copyDataBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy';
+            }, 2000);
+        });
+
+        function addMessage(content, role, sql = null, data = null) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+            
+            let formattedContent = escapeHtml(content)
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/## (.*?)(?:\n|$)/g, '<strong style="display:block;margin-top:12px;margin-bottom:4px;">$1</strong>')
+                .replace(/\n/g, '<br>');
+            
+            let html = `<div class="message-content">${formattedContent}</div>`;
+            
+            const chartConfig = data ? detectChartableData(data) : null;
+            
+            if (sql || (data && data.length > 0) || chartConfig) {
+                html += '<div class="message-extras">';
+                
+                if (sql) {
+                    html += `
+                        <button class="extras-btn view-sql-btn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/>
+                            </svg>
+                            View SQL
+                        </button>
+                    `;
+                }
+                
+                if (data && data.length > 0) {
+                    html += `
+                        <button class="extras-btn view-data-btn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/>
+                            </svg>
+                            View Data (${data.length} rows)
+                        </button>
+                    `;
+                }
+                
+                if (chartConfig) {
+                    html += `
+                        <button class="extras-btn view-chart-btn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 3v18h18"/><path d="M18 9l-5 5-4-4-3 3"/>
+                            </svg>
+                            View Chart
+                        </button>
+                    `;
+                }
+                
+                html += '</div>';
+            }
+            
+            messageDiv.innerHTML = html;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            
+            // Attach event listeners
+            const sqlBtn = messageDiv.querySelector('.view-sql-btn');
+            if (sqlBtn && sql) {
+                sqlBtn.addEventListener('click', () => openSqlModal(sql));
+            }
+            
+            const dataBtn = messageDiv.querySelector('.view-data-btn');
+            if (dataBtn && data) {
+                dataBtn.addEventListener('click', () => openDataPanel(data));
+            }
+            
+            const chartBtn = messageDiv.querySelector('.view-chart-btn');
+            if (chartBtn && chartConfig) {
+                chartBtn.addEventListener('click', () => openChartModal(data, 'Trend Analysis'));
+            }
+        }
+
+        function createTable(data) {
+            if (!data || data.length === 0) return '<p style="padding:20px;color:var(--text-secondary);">No data</p>';
+            
+            const columns = Object.keys(data[0]);
+            let html = '<table class="data-table"><thead><tr>';
+            
+            columns.forEach(col => {
+                html += `<th>${escapeHtml(col)}</th>`;
+            });
+            
+            html += '</tr></thead><tbody>';
+            
+            data.forEach(row => {
+                html += '<tr>';
+                columns.forEach(col => {
+                    const val = row[col] !== null ? row[col] : '';
+                    html += `<td>${escapeHtml(String(val))}</td>`;
+                });
+                html += '</tr>';
+            });
+            
+            html += '</tbody></table>';
+            return html;
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        function setLoading(loading) {
+            sendBtn.disabled = loading;
+            userInput.disabled = loading;
+            
+            if (loading) {
+                sendBtn.innerHTML = '<span class="spinner"></span>';
+                const thinkingDiv = document.createElement('div');
+                thinkingDiv.className = 'message assistant thinking';
+                thinkingDiv.id = 'thinking-indicator';
+                thinkingDiv.innerHTML = `
+                    <div class="message-content">
+                        <div class="dot-pulse"><span></span><span></span><span></span></div>
+                        Analyzing your data...
+                    </div>
+                `;
+                messagesDiv.appendChild(thinkingDiv);
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            } else {
+                sendBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2"/></svg>';
+                const thinking = document.getElementById('thinking-indicator');
+                if (thinking) thinking.remove();
+            }
+        }
+        
+        // Simulated streaming - types out the response
+        async function typeMessage(content, messageDiv, sql, data) {
+            const contentDiv = messageDiv.querySelector('.message-content');
+            let displayed = '';
+            const words = content.split(' ');
+            
+            for (let i = 0; i < words.length; i++) {
+                displayed += words[i] + (i < words.length - 1 ? ' ' : '');
+                let formatted = escapeHtml(displayed)
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/## (.*?)(?:\n|$)/g, '<strong style="display:block;margin-top:12px;margin-bottom:4px;">$1</strong>')
+                    .replace(/\n/g, '<br>');
+                contentDiv.innerHTML = formatted + '<span class="streaming-cursor"></span>';
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                await new Promise(r => setTimeout(r, 15));
+            }
+            
+            // Final render with extras
+            let formatted = escapeHtml(content)
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/## (.*?)(?:\n|$)/g, '<strong style="display:block;margin-top:12px;margin-bottom:4px;">$1</strong>')
+                .replace(/\n/g, '<br>');
+            
+            let html = `<div class="message-content">${formatted}</div>`;
+            
+            const chartConfig = data ? detectChartableData(data) : null;
+            
+            if (sql || (data && data.length > 0) || chartConfig) {
+                html += '<div class="message-extras">';
+                if (sql) {
+                    html += `<button class="extras-btn view-sql-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg> View SQL</button>`;
+                }
+                if (data && data.length > 0) {
+                    html += `<button class="extras-btn view-data-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg> View Data (${data.length} rows)</button>`;
+                }
+                if (chartConfig) {
+                    html += `<button class="extras-btn view-chart-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 9l-5 5-4-4-3 3"/></svg> View Chart</button>`;
+                }
+                html += '</div>';
+            }
+            
+            messageDiv.innerHTML = html;
+            
+            const sqlBtn = messageDiv.querySelector('.view-sql-btn');
+            if (sqlBtn && sql) sqlBtn.addEventListener('click', () => openSqlModal(sql));
+            
+            const dataBtn = messageDiv.querySelector('.view-data-btn');
+            if (dataBtn && data) dataBtn.addEventListener('click', () => openDataPanel(data));
+            
+            const chartBtn = messageDiv.querySelector('.view-chart-btn');
+            if (chartBtn && chartConfig) chartBtn.addEventListener('click', () => openChartModal(data, 'Trend Analysis'));
+        }
+        
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const message = userInput.value.trim();
+            if (!message) return;
+            
+            addMessage(message, 'user');
+            userInput.value = '';
+            setLoading(true);
+            
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
+                });
+                
+                const result = await response.json();
+                setLoading(false);
+                
+                if (result.error && !result.answer) {
+                    addMessage(`Error: ${result.error}`, 'assistant');
+                    addToHistory(message, `Error: ${result.error}`, null, null);
+                } else {
+                    // Create message div for typing effect
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = 'message assistant';
+                    messageDiv.innerHTML = '<div class="message-content"><span class="streaming-cursor"></span></div>';
+                    messagesDiv.appendChild(messageDiv);
+                    
+                    await typeMessage(result.answer, messageDiv, result.sql, result.data);
+                    
+                    // Save to history with full response
+                    addToHistory(message, result.answer, result.sql, result.data);
+                }
+            } catch (err) {
+                setLoading(false);
+                addMessage(`Failed to connect: ${err.message}`, 'assistant');
+                addToHistory(message, `Failed to connect: ${err.message}`, null, null);
+            } finally {
+                userInput.focus();
+            }
+        });
+        
+        // Initialize
+        renderHistory();
+        renderDownloads();
+        userInput.focus();
+        
+        // Clear all history button
+        document.getElementById('clear-history-btn').addEventListener('click', clearAllHistory);
+        
+        // New chat button
+        document.getElementById('new-chat-btn').addEventListener('click', () => {
+            messagesDiv.innerHTML = `
+                <div class="message assistant">
+                    <div class="message-content">
+                        Hi! I'm your marketing data assistant. Ask me anything about your 
+                        Google Shopping data, GA4 analytics, ad campaigns, inventory, or SEO rankings.
+                    </div>
+                </div>
+            `;
+            historyList.querySelectorAll('.history-item').forEach(el => el.classList.remove('active'));
+            userInput.focus();
+        });
+    </script>
+</body>
+</html>
