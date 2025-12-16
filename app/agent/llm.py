@@ -1,17 +1,20 @@
-"""Claude API client wrapper."""
+"""Hyperbolic API client wrapper for Llama models."""
 
-import anthropic
+from openai import OpenAI
 from config import settings
 
 
 class LLMClient:
-    """Wrapper for Anthropic Claude API."""
+    """Wrapper for Hyperbolic API (OpenAI-compatible) with Llama models."""
 
-    MODEL = "claude-sonnet-4-5-20250929"
     MAX_TOKENS = 2048
 
     def __init__(self):
-        self.client = anthropic.Anthropic(api_key=settings.anthropic_api_key)
+        self.client = OpenAI(
+            api_key=settings.hyperbolic_api_key,
+            base_url="https://api.hyperbolic.xyz/v1"
+        )
+        self.model = settings.llm_model
 
     def generate(
         self,
@@ -20,7 +23,7 @@ class LLMClient:
         conversation_history: list[dict] | None = None
     ) -> str:
         """
-        Generate a response from Claude.
+        Generate a response from Llama via Hyperbolic.
 
         Args:
             user_message: The user's current message
@@ -31,7 +34,7 @@ class LLMClient:
         Returns:
             The assistant's response text
         """
-        messages = []
+        messages = [{"role": "system", "content": system_prompt}]
 
         # Add conversation history if provided
         if conversation_history:
@@ -40,14 +43,13 @@ class LLMClient:
         # Add the current user message
         messages.append({"role": "user", "content": user_message})
 
-        response = self.client.messages.create(
-            model=self.MODEL,
+        response = self.client.chat.completions.create(
+            model=self.model,
             max_tokens=self.MAX_TOKENS,
-            system=system_prompt,
             messages=messages
         )
 
-        return response.content[0].text
+        return response.choices[0].message.content
 
     def generate_stream(
         self,
@@ -56,7 +58,7 @@ class LLMClient:
         conversation_history: list[dict] | None = None
     ):
         """
-        Stream a response from Claude in real-time.
+        Stream a response from Llama via Hyperbolic in real-time.
 
         Args:
             user_message: The user's current message
@@ -64,9 +66,9 @@ class LLMClient:
             conversation_history: Optional list of previous messages
 
         Yields:
-            Text tokens as they arrive from Claude
+            Text tokens as they arrive from Llama
         """
-        messages = []
+        messages = [{"role": "system", "content": system_prompt}]
 
         # Add conversation history if provided
         if conversation_history:
@@ -75,15 +77,17 @@ class LLMClient:
         # Add the current user message
         messages.append({"role": "user", "content": user_message})
 
-        # Stream response from Claude
-        with self.client.messages.stream(
-            model=self.MODEL,
+        # Stream response from Hyperbolic
+        stream = self.client.chat.completions.create(
+            model=self.model,
             max_tokens=self.MAX_TOKENS,
-            system=system_prompt,
-            messages=messages
-        ) as stream:
-            for text in stream.text_stream:
-                yield text
+            messages=messages,
+            stream=True
+        )
+
+        for chunk in stream:
+            if chunk.choices[0].delta.content:
+                yield chunk.choices[0].delta.content
     
     def generate_with_retry(
         self,
@@ -92,23 +96,25 @@ class LLMClient:
         max_retries: int = 2
     ) -> str:
         """Generate with automatic retry on transient failures."""
+        from openai import APIConnectionError, RateLimitError, APIStatusError
+        import time
+
         last_error = None
-        
+
         for attempt in range(max_retries + 1):
             try:
                 return self.generate(user_message, system_prompt)
-            except anthropic.APIConnectionError as e:
+            except APIConnectionError as e:
                 last_error = e
                 if attempt < max_retries:
                     continue
-            except anthropic.RateLimitError as e:
+            except RateLimitError as e:
                 last_error = e
                 if attempt < max_retries:
-                    import time
                     time.sleep(2 ** attempt)  # Exponential backoff
                     continue
-            except anthropic.APIStatusError as e:
+            except APIStatusError as e:
                 # Don't retry on 4xx errors
                 raise
-        
+
         raise last_error

@@ -8,9 +8,11 @@ class Settings:
     """Application configuration loaded from environment variables."""
     
     def __init__(self):
-        # Anthropic
-        self.anthropic_api_key = os.getenv("ANTHROPIC_API_KEY")
-        
+        # LLM Provider - Hyperbolic
+        self.hyperbolic_api_key = os.getenv("HYPERBOLIC_API_KEY")
+        # Choose model: "meta-llama/Llama-3.3-70B-Instruct" or "meta-llama/Meta-Llama-3.1-405B-Instruct"
+        self.llm_model = os.getenv("LLM_MODEL", "meta-llama/Llama-3.3-70B-Instruct")
+
         # Snowflake
         self.snowflake_account = os.getenv("SNOWFLAKE_ACCOUNT")
         self.snowflake_user = os.getenv("SNOWFLAKE_USER")
@@ -38,7 +40,7 @@ class Settings:
     def validate(self) -> list[str]:
         """Check for missing required configuration. Returns list of missing vars."""
         required = [
-            ("ANTHROPIC_API_KEY", self.anthropic_api_key),
+            ("HYPERBOLIC_API_KEY", self.hyperbolic_api_key),
             ("SNOWFLAKE_ACCOUNT", self.snowflake_account),
             ("SNOWFLAKE_USER", self.snowflake_user),
             ("SNOWFLAKE_PASSWORD", self.snowflake_password),
