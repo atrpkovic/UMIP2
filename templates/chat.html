@@ -577,6 +577,9 @@
         function openDataPanel(data) {
             currentData = data;
             currentPage = 1; // Reset to first page when opening new data
+            columnOrder = []; // Reset column order
+            sortColumn = null; // Reset sorting
+            sortDirection = 'asc';
             dataRowCount.textContent = `(${data.length} rows)`;
             dataTableContainer.innerHTML = createTable(data);
             dataPanel.classList.add('active');
@@ -587,6 +590,16 @@
             sqlContent.textContent = sql;
             sqlModal.classList.add('active');
             overlay.classList.add('active');
+        }
+
+        // Rename conversation
+        function renameConversation(convId, newTitle) {
+            const conv = conversations.find(c => c.id === convId);
+            if (!conv) return;
+
+            conv.title = newTitle.trim() || conv.title; // Keep old title if empty
+            saveConversations();
+            renderHistory();
         }
 
         // Render history
@@ -619,7 +632,7 @@
                 return `
                 <div class="history-item${activeClass}" data-conv-id="${conv.id}">
                     <div class="history-item-content">
-                        <div class="query">${escapeHtml(conv.title)}</div>
+                        <div class="query" data-conv-id="${conv.id}">${escapeHtml(conv.title)}</div>
                         <div class="time">${messageCount} message${messageCount !== 1 ? 's' : ''} • ${timeText}</div>
                     </div>
                     <button class="history-delete" data-conv-id="${conv.id}" title="Delete">
@@ -630,11 +643,61 @@
                 </div>
             `}).join('');
 
-            // Click to load conversation
-            historyList.querySelectorAll('.history-item-content').forEach(el => {
-                el.addEventListener('click', () => {
-                    const convId = el.closest('.history-item').dataset.convId;
-                    loadConversation(convId);
+            // Double-click on title to rename
+            historyList.querySelectorAll('.query').forEach(titleEl => {
+                let clickTimer = null;
+
+                titleEl.addEventListener('click', (e) => {
+                    e.stopPropagation();
+
+                    if (clickTimer) {
+                        // Double click detected
+                        clearTimeout(clickTimer);
+                        clickTimer = null;
+
+                        const convId = titleEl.dataset.convId;
+                        const conv = conversations.find(c => c.id === convId);
+                        if (!conv) return;
+
+                        // Create input element
+                        const currentTitle = conv.title;
+                        titleEl.classList.add('editing');
+                        titleEl.innerHTML = `<input type="text" value="${escapeHtml(currentTitle)}" />`;
+
+                        const input = titleEl.querySelector('input');
+                        input.focus();
+                        input.select();
+
+                        // Save on blur or Enter
+                        const saveRename = () => {
+                            const newTitle = input.value.trim();
+                            if (newTitle && newTitle !== currentTitle) {
+                                renameConversation(convId, newTitle);
+                            } else {
+                                titleEl.classList.remove('editing');
+                                titleEl.textContent = currentTitle;
+                            }
+                        };
+
+                        input.addEventListener('blur', saveRename);
+                        input.addEventListener('keydown', (e) => {
+                            if (e.key === 'Enter') {
+                                e.preventDefault();
+                                input.blur();
+                            } else if (e.key === 'Escape') {
+                                e.preventDefault();
+                                titleEl.classList.remove('editing');
+                                titleEl.textContent = currentTitle;
+                            }
+                        });
+                    } else {
+                        // First click - load conversation after delay
+                        clickTimer = setTimeout(() => {
+                            clickTimer = null;
+                            const convId = titleEl.closest('.history-item').dataset.convId;
+                            loadConversation(convId);
+                        }, 250);
+                    }
                 });
             });
 
@@ -1136,11 +1199,19 @@
         // Paginated table rendering - only shows 100 rows at a time
         let currentPage = 1;
         const rowsPerPage = 100;
+        let columnOrder = [];
+        let sortColumn = null;
+        let sortDirection = 'asc';
 
         function createTable(data) {
             if (!data || data.length === 0) return '<p style="padding:20px;color:var(--text-secondary);">No data</p>';
 
-            const columns = Object.keys(data[0]);
+            // Initialize column order if not set
+            if (columnOrder.length === 0) {
+                columnOrder = Object.keys(data[0]);
+            }
+
+            const columns = columnOrder;
             const totalRows = data.length;
             const totalPages = Math.ceil(totalRows / rowsPerPage);
 
@@ -1178,7 +1249,11 @@
             let html = paginationHtml + '<table class="data-table"><thead><tr>';
 
             columns.forEach(col => {
-                html += `<th>${escapeHtml(col)}</th>`;
+                const sortClass = sortColumn === col ? `sorted-${sortDirection}` : '';
+                html += `<th class="${sortClass}" data-column="${escapeHtml(col)}" draggable="true">
+                    ${escapeHtml(col)}
+                    <span class="sort-indicator"></span>
+                </th>`;
             });
 
             html += '</tr></thead><tbody>';
@@ -1193,7 +1268,123 @@
             });
 
             html += '</tbody></table>';
+
+            // After rendering, attach event listeners
+            setTimeout(() => attachTableEventListeners(), 0);
+
             return html;
+        }
+
+        // Attach sorting and drag-drop event listeners to table headers
+        function attachTableEventListeners() {
+            const headers = dataTableContainer.querySelectorAll('.data-table th');
+
+            headers.forEach(header => {
+                // Click to sort
+                header.addEventListener('click', () => {
+                    const column = header.dataset.column;
+                    sortTable(column);
+                });
+
+                // Drag and drop for column reordering
+                header.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('text/plain', header.dataset.column);
+                    header.classList.add('dragging');
+                });
+
+                header.addEventListener('dragend', () => {
+                    header.classList.remove('dragging');
+                    headers.forEach(h => h.classList.remove('drag-over'));
+                });
+
+                header.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                });
+
+                header.addEventListener('dragenter', (e) => {
+                    e.preventDefault();
+                    header.classList.add('drag-over');
+                });
+
+                header.addEventListener('dragleave', () => {
+                    header.classList.remove('drag-over');
+                });
+
+                header.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    header.classList.remove('drag-over');
+
+                    const draggedColumn = e.dataTransfer.getData('text/plain');
+                    const targetColumn = header.dataset.column;
+
+                    if (draggedColumn !== targetColumn) {
+                        reorderColumns(draggedColumn, targetColumn);
+                    }
+                });
+            });
+        }
+
+        // Sort table by column
+        function sortTable(column) {
+            if (!currentData) return;
+
+            // Toggle sort direction if clicking the same column
+            if (sortColumn === column) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortColumn = column;
+                sortDirection = 'asc';
+            }
+
+            // Sort the data
+            currentData.sort((a, b) => {
+                let aVal = a[column];
+                let bVal = b[column];
+
+                // Handle null/undefined
+                if (aVal === null || aVal === undefined) return 1;
+                if (bVal === null || bVal === undefined) return -1;
+
+                // Try to parse as numbers
+                const aNum = parseFloat(aVal);
+                const bNum = parseFloat(bVal);
+
+                if (!isNaN(aNum) && !isNaN(bNum)) {
+                    return sortDirection === 'asc' ? aNum - bNum : bNum - aNum;
+                }
+
+                // String comparison
+                const aStr = String(aVal).toLowerCase();
+                const bStr = String(bVal).toLowerCase();
+
+                if (sortDirection === 'asc') {
+                    return aStr < bStr ? -1 : aStr > bStr ? 1 : 0;
+                } else {
+                    return aStr > bStr ? -1 : aStr < bStr ? 1 : 0;
+                }
+            });
+
+            // Reset to first page and re-render
+            currentPage = 1;
+            dataTableContainer.innerHTML = createTable(currentData);
+        }
+
+        // Reorder columns
+        function reorderColumns(draggedColumn, targetColumn) {
+            const draggedIndex = columnOrder.indexOf(draggedColumn);
+            const targetIndex = columnOrder.indexOf(targetColumn);
+
+            if (draggedIndex === -1 || targetIndex === -1) return;
+
+            // Remove dragged column and insert at target position
+            columnOrder.splice(draggedIndex, 1);
+            const newTargetIndex = columnOrder.indexOf(targetColumn);
+            columnOrder.splice(newTargetIndex, 0, draggedColumn);
+
+            // Re-render table with new column order
+            dataTableContainer.innerHTML = createTable(currentData);
         }
 
         // Page navigation

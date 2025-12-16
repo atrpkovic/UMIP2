@@ -130,6 +130,24 @@ body {
     text-overflow: ellipsis;
 }
 
+.history-item .query.editing {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+}
+
+.history-item .query input {
+    width: 100%;
+    background: var(--bg-primary);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    font-family: inherit;
+    outline: none;
+}
+
 .history-item .time {
     font-size: 0.75rem;
     color: var(--text-secondary);
@@ -692,6 +710,50 @@ main#messages {
     position: sticky;
     top: 0;
     z-index: 1;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+    position: relative;
+    padding-right: 30px;
+}
+
+.data-table th:hover {
+    background: var(--bg-secondary);
+}
+
+.data-table th .sort-indicator {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.3;
+    font-size: 0.75rem;
+}
+
+.data-table th.sorted-asc .sort-indicator {
+    opacity: 1;
+}
+
+.data-table th.sorted-asc .sort-indicator::after {
+    content: '▲';
+}
+
+.data-table th.sorted-desc .sort-indicator {
+    opacity: 1;
+}
+
+.data-table th.sorted-desc .sort-indicator::after {
+    content: '▼';
+}
+
+.data-table th.dragging {
+    opacity: 0.5;
+    background: var(--accent-light);
+    cursor: grabbing;
+}
+
+.data-table th.drag-over {
+    border-left: 3px solid var(--accent);
 }
 
 .data-table tr:hover td {
