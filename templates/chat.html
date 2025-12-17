@@ -159,68 +159,6 @@
         </div>
     </div>
 
-    <!-- PIN Setup Banner -->
-    <div class="pin-banner" id="pin-banner" style="display: none;">
-        <div class="pin-banner-content">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0;">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-            </svg>
-            <div class="pin-banner-text">
-                <strong>Protect your conversations!</strong>
-                <span class="pin-tooltip">Set a PIN to access your data from any browser or after clearing cache.</span>
-            </div>
-            <button class="pin-banner-btn" id="setup-pin-btn">Set PIN</button>
-            <button class="pin-banner-close" id="pin-banner-close" title="Dismiss">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M18 6L6 18M6 6l12 12"/>
-                </svg>
-            </button>
-        </div>
-    </div>
-
-    <!-- PIN Setup Modal -->
-    <div class="pin-modal" id="pin-modal" style="display: none;">
-        <div class="pin-modal-content">
-            <div class="pin-modal-header">
-                <h3>Set Your PIN</h3>
-                <button class="pin-modal-close" id="pin-modal-close">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M18 6L6 18M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
-            <div class="pin-modal-body">
-                <p>Choose a 4-8 digit PIN to backup your user ID. You'll need this PIN to access your conversations from other browsers or after clearing cache.</p>
-                <input type="password" id="pin-input" placeholder="Enter 4-8 digit PIN" maxlength="8" pattern="[0-9]*" inputmode="numeric">
-                <input type="password" id="pin-confirm" placeholder="Confirm PIN" maxlength="8" pattern="[0-9]*" inputmode="numeric">
-                <div class="pin-error" id="pin-error" style="display: none;"></div>
-            </div>
-            <div class="pin-modal-footer">
-                <button class="btn-secondary" id="pin-cancel-btn">Cancel</button>
-                <button class="btn-primary" id="pin-save-btn">Save PIN</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- PIN Recovery Modal -->
-    <div class="pin-modal" id="pin-recovery-modal" style="display: none;">
-        <div class="pin-modal-content">
-            <div class="pin-modal-header">
-                <h3>Recover Your Conversations</h3>
-            </div>
-            <div class="pin-modal-body">
-                <p>Enter your PIN to restore your conversations, or start fresh with a new account.</p>
-                <input type="password" id="recovery-pin-input" placeholder="Enter your PIN" maxlength="8" pattern="[0-9]*" inputmode="numeric">
-                <div class="pin-error" id="recovery-pin-error" style="display: none;"></div>
-            </div>
-            <div class="pin-modal-footer">
-                <button class="btn-secondary" id="recovery-cancel-btn">Start Fresh</button>
-                <button class="btn-primary" id="recovery-submit-btn">Recover</button>
-            </div>
-        </div>
-    </div>
-
     <!-- Model Selection Modal (First Visit) -->
     <div class="pin-modal" id="model-selection-modal" style="display: none;">
         <div class="pin-modal-content" style="max-width: 500px; padding: 0; overflow: hidden;">
@@ -284,22 +222,14 @@
         let lastActivityTime = Date.now();
         const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes in milliseconds
 
-        // User ID management (Browser-based UUID with optional PIN backup)
+        // User ID management (Browser-based UUID)
         let userId = localStorage.getItem('userId') || null;
 
         // Generate UUID if not present
-        function generateUserId() {
-            return 'user-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
-        }
-
-        // Initialize user ID on first visit
         if (!userId) {
-            userId = generateUserId();
+            userId = 'user-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
             localStorage.setItem('userId', userId);
             console.log('Generated new user ID:', userId);
-
-            // Show PIN setup banner after a short delay
-            setTimeout(() => showPinSetupBanner(), 2000);
         }
 
         let downloads = JSON.parse(localStorage.getItem('downloads') || '[]');
@@ -1098,180 +1028,6 @@
 
             renderHistory();
         }
-
-        // ===== PIN Management =====
-
-        function showPinSetupBanner() {
-            const banner = document.getElementById('pin-banner');
-            banner.style.display = 'flex';
-        }
-
-        function hidePinSetupBanner() {
-            const banner = document.getElementById('pin-banner');
-            banner.style.display = 'none';
-        }
-
-        function showPinModal() {
-            const modal = document.getElementById('pin-modal');
-            const overlay = document.getElementById('overlay');
-            modal.style.display = 'flex';
-            overlay.classList.add('active');
-            document.getElementById('pin-input').value = '';
-            document.getElementById('pin-confirm').value = '';
-            document.getElementById('pin-error').style.display = 'none';
-        }
-
-        function hidePinModal() {
-            const modal = document.getElementById('pin-modal');
-            const overlay = document.getElementById('overlay');
-            modal.style.display = 'none';
-            overlay.classList.remove('active');
-        }
-
-        function showRecoveryModal() {
-            const modal = document.getElementById('pin-recovery-modal');
-            const overlay = document.getElementById('overlay');
-            modal.style.display = 'flex';
-            overlay.classList.add('active');
-            document.getElementById('recovery-pin-input').value = '';
-            document.getElementById('recovery-pin-error').style.display = 'none';
-        }
-
-        function hideRecoveryModal() {
-            const modal = document.getElementById('pin-recovery-modal');
-            const overlay = document.getElementById('overlay');
-            modal.style.display = 'none';
-            overlay.classList.remove('active');
-        }
-
-        async function registerPin(pin) {
-            try {
-                const response = await fetch('/api/user/register-pin', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ pin, userId })
-                });
-
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data.error || 'Failed to register PIN');
-                }
-
-                return { success: true };
-            } catch (error) {
-                return { success: false, error: error.message };
-            }
-        }
-
-        async function recoverUserId(pin) {
-            try {
-                const response = await fetch('/api/user/recover-user', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ pin })
-                });
-
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data.error || 'Failed to recover user ID');
-                }
-
-                return { success: true, userId: data.userId };
-            } catch (error) {
-                return { success: false, error: error.message };
-            }
-        }
-
-        // Event Listeners for PIN UI
-        document.getElementById('setup-pin-btn').addEventListener('click', () => {
-            hidePinSetupBanner();
-            showPinModal();
-        });
-
-        document.getElementById('pin-banner-close').addEventListener('click', hidePinSetupBanner);
-        document.getElementById('pin-modal-close').addEventListener('click', hidePinModal);
-        document.getElementById('pin-cancel-btn').addEventListener('click', hidePinModal);
-
-        document.getElementById('pin-save-btn').addEventListener('click', async () => {
-            const pinInput = document.getElementById('pin-input');
-            const pinConfirm = document.getElementById('pin-confirm');
-            const errorDiv = document.getElementById('pin-error');
-
-            const pin = pinInput.value.trim();
-            const confirmPin = pinConfirm.value.trim();
-
-            // Validation
-            if (!pin || !confirmPin) {
-                errorDiv.textContent = 'Please enter and confirm your PIN';
-                errorDiv.style.display = 'block';
-                return;
-            }
-
-            if (!/^\d{4,8}$/.test(pin)) {
-                errorDiv.textContent = 'PIN must be 4-8 digits';
-                errorDiv.style.display = 'block';
-                return;
-            }
-
-            if (pin !== confirmPin) {
-                errorDiv.textContent = 'PINs do not match';
-                errorDiv.style.display = 'block';
-                return;
-            }
-
-            // Register PIN
-            const result = await registerPin(pin);
-
-            if (result.success) {
-                hidePinModal();
-                alert('PIN set successfully! You can now use this PIN to access your conversations from any browser.');
-            } else {
-                errorDiv.textContent = result.error;
-                errorDiv.style.display = 'block';
-            }
-        });
-
-        document.getElementById('recovery-submit-btn').addEventListener('click', async () => {
-            const pinInput = document.getElementById('recovery-pin-input');
-            const errorDiv = document.getElementById('recovery-pin-error');
-
-            const pin = pinInput.value.trim();
-
-            if (!pin) {
-                errorDiv.textContent = 'Please enter your PIN';
-                errorDiv.style.display = 'block';
-                return;
-            }
-
-            if (!/^\d{4,8}$/.test(pin)) {
-                errorDiv.textContent = 'PIN must be 4-8 digits';
-                errorDiv.style.display = 'block';
-                return;
-            }
-
-            // Attempt recovery
-            const result = await recoverUserId(pin);
-
-            if (result.success) {
-                // Restore user ID
-                userId = result.userId;
-                localStorage.setItem('userId', userId);
-
-                hideRecoveryModal();
-                alert('Welcome back! Your conversations have been restored.');
-                location.reload(); // Reload to fetch user's conversations
-            } else {
-                errorDiv.textContent = result.error;
-                errorDiv.style.display = 'block';
-            }
-        });
-
-        document.getElementById('recovery-cancel-btn').addEventListener('click', () => {
-            hideRecoveryModal();
-            // User chose to start fresh - keep the newly generated userId
-        });
 
         // Download CSV
         downloadCsvBtn.addEventListener('click', () => {

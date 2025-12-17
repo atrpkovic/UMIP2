@@ -14,9 +14,7 @@ def create_app() -> Flask:
 
     # Register blueprints
     from app.routes.chat import chat_bp
-    from app.routes.user import user_bp
     app.register_blueprint(chat_bp)
-    app.register_blueprint(user_bp)
 
     # Register main routes
     @app.route("/")
