@@ -58,8 +58,7 @@
                         <select class="model-selector" id="model-selector" title="Select AI Model">
                             <option value="claude-sonnet">Claude Sonnet</option>
                             <option value="llama-3.3-70b">Llama 3.3 - 70B</option>
-                            <option value="deepseek-v3" selected>DeepSeek-V3</option>
-                            <option value="gpt-4o">ChatGPT 4o-mini</option>
+                            <option value="deepseek-v3">DeepSeek-V3</option>
                             <option value="gemini">Gemini 3</option>
                         </select>
                     </div>
@@ -222,6 +221,54 @@
         </div>
     </div>
 
+    <!-- Model Selection Modal (First Visit) -->
+    <div class="pin-modal" id="model-selection-modal" style="display: none;">
+        <div class="pin-modal-content" style="max-width: 500px; padding: 0; overflow: hidden;">
+            <div style="background: linear-gradient(135deg, #f2a61d 0%, #e8941a 100%); padding: 24px 28px; text-align: center;">
+                <h2 style="margin: 0 0 8px 0; color: white; font-size: 24px; font-weight: 600;">Welcome to UMIP 2.0</h2>
+                <p style="margin: 0; color: rgba(255,255,255,0.9); font-size: 14px;">Priority Tire Marketing Intelligence</p>
+            </div>
+            <div style="padding: 24px 28px;">
+                <p style="margin: 0 0 20px 0; color: var(--text-primary); font-size: 15px; text-align: center;">Choose your AI model to get started</p>
+                <div class="model-options" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <label class="model-option" data-value="claude-sonnet" style="display: flex; flex-direction: column; align-items: center; padding: 20px 16px; border: 2px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: all 0.2s; text-align: center; background: var(--bg-primary);">
+                        <input type="radio" name="initial-model" value="claude-sonnet" style="display: none;">
+                        <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #d97706 0%, #b45309 100%); display: flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                        </div>
+                        <strong style="font-size: 14px; color: var(--text-primary); margin-bottom: 4px;">Claude Sonnet</strong>
+                        <span style="font-size: 11px; color: var(--text-secondary); line-height: 1.3;">Best for complex reasoning</span>
+                    </label>
+                    <label class="model-option" data-value="deepseek-v3" style="display: flex; flex-direction: column; align-items: center; padding: 20px 16px; border: 2px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: all 0.2s; text-align: center; background: var(--bg-primary);">
+                        <input type="radio" name="initial-model" value="deepseek-v3" style="display: none;">
+                        <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); display: flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                        </div>
+                        <strong style="font-size: 14px; color: var(--text-primary); margin-bottom: 4px;">DeepSeek-V3</strong>
+                        <span style="font-size: 11px; color: var(--text-secondary); line-height: 1.3;">Fast & cost-effective</span>
+                    </label>
+                    <label class="model-option" data-value="llama-3.3-70b" style="display: flex; flex-direction: column; align-items: center; padding: 20px 16px; border: 2px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: all 0.2s; text-align: center; background: var(--bg-primary);">
+                        <input type="radio" name="initial-model" value="llama-3.3-70b" style="display: none;">
+                        <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); display: flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10H12V2z"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>
+                        </div>
+                        <strong style="font-size: 14px; color: var(--text-primary); margin-bottom: 4px;">Llama 3.3 70B</strong>
+                        <span style="font-size: 11px; color: var(--text-secondary); line-height: 1.3;">Open-source, balanced</span>
+                    </label>
+                    <label class="model-option" data-value="gemini" style="display: flex; flex-direction: column; align-items: center; padding: 20px 16px; border: 2px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: all 0.2s; text-align: center; background: var(--bg-primary);">
+                        <input type="radio" name="initial-model" value="gemini" style="display: none;">
+                        <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); display: flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        </div>
+                        <strong style="font-size: 14px; color: var(--text-primary); margin-bottom: 4px;">Gemini 3</strong>
+                        <span style="font-size: 11px; color: var(--text-secondary); line-height: 1.3;">Google's latest model</span>
+                    </label>
+                </div>
+                <button class="btn-primary" id="model-confirm-btn" disabled style="width: 100%; margin-top: 20px; padding: 14px; font-size: 15px; font-weight: 600; border-radius: 10px;">Get Started</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Overlay -->
     <div class="overlay" id="overlay"></div>
 
@@ -327,21 +374,101 @@
 
         // Model selector
         const modelSelector = document.getElementById('model-selector');
-        const savedModel = localStorage.getItem('selected-model') || 'deepseek-v3';
-        modelSelector.value = savedModel;
+        const savedModel = localStorage.getItem('selected-model');
+        const isFirstVisit = !savedModel;
 
-        // Set initial model on page load
-        (async () => {
+        // Show model selection modal on first visit
+        if (isFirstVisit) {
+            showModelSelectionModal();
+        } else {
+            modelSelector.value = savedModel;
+            // Set initial model on page load
+            (async () => {
+                try {
+                    await fetch('/api/model', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ model: savedModel })
+                    });
+                } catch (error) {
+                    console.error('Error setting initial model:', error);
+                }
+            })();
+        }
+
+        // Model selection modal functions
+        function showModelSelectionModal() {
+            const modal = document.getElementById('model-selection-modal');
+            const overlay = document.getElementById('overlay');
+            modal.style.display = 'flex';
+            overlay.classList.add('active');
+        }
+
+        function hideModelSelectionModal() {
+            const modal = document.getElementById('model-selection-modal');
+            const overlay = document.getElementById('overlay');
+            modal.style.display = 'none';
+            overlay.classList.remove('active');
+        }
+
+        // Model option selection styling and button enable
+        document.querySelectorAll('.model-option').forEach(option => {
+            option.addEventListener('click', () => {
+                const radio = option.querySelector('input[type="radio"]');
+                radio.checked = true;
+
+                // Remove selected styling from all options
+                document.querySelectorAll('.model-option').forEach(opt => {
+                    opt.style.borderColor = 'var(--border-color)';
+                    opt.style.background = 'var(--bg-primary)';
+                    opt.style.transform = 'scale(1)';
+                });
+                // Add selected styling to clicked option
+                option.style.borderColor = '#f2a61d';
+                option.style.background = 'rgba(242, 166, 29, 0.08)';
+                option.style.transform = 'scale(1.02)';
+                // Enable confirm button
+                document.getElementById('model-confirm-btn').disabled = false;
+            });
+
+            // Hover effects
+            option.addEventListener('mouseenter', () => {
+                if (!option.querySelector('input[type="radio"]').checked) {
+                    option.style.borderColor = 'var(--text-secondary)';
+                    option.style.transform = 'scale(1.01)';
+                }
+            });
+            option.addEventListener('mouseleave', () => {
+                if (!option.querySelector('input[type="radio"]').checked) {
+                    option.style.borderColor = 'var(--border-color)';
+                    option.style.transform = 'scale(1)';
+                }
+            });
+        });
+
+        // Confirm model selection
+        document.getElementById('model-confirm-btn').addEventListener('click', async () => {
+            const selectedRadio = document.querySelector('input[name="initial-model"]:checked');
+            if (!selectedRadio) return;
+
+            const selectedModel = selectedRadio.value;
+            localStorage.setItem('selected-model', selectedModel);
+            modelSelector.value = selectedModel;
+
             try {
                 await fetch('/api/model', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ model: savedModel })
+                    body: JSON.stringify({ model: selectedModel })
                 });
+                console.log('Model set to:', selectedModel);
             } catch (error) {
-                console.error('Error setting initial model:', error);
+                console.error('Error setting model:', error);
             }
-        })();
+
+            hideModelSelectionModal();
+            userInput.focus();
+        });
 
         modelSelector.addEventListener('change', async () => {
             const selectedModel = modelSelector.value;

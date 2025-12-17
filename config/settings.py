@@ -11,7 +11,6 @@ class Settings:
         # LLM Providers
         self.anthropic_api_key = os.getenv("ANTHROPIC_API_KEY")
         self.hyperbolic_api_key = os.getenv("HYPERBOLIC_API_KEY")
-        self.openai_api_key = os.getenv("OPENAI_API_KEY")
         self.gemini_api_key = os.getenv("GEMINI_API_KEY")
         # Default model
         self.llm_model = os.getenv("LLM_MODEL", "meta-llama/Llama-3.3-70B-Instruct")
@@ -46,8 +45,8 @@ class Settings:
 
         # Check for at least one LLM provider
         if not any([self.anthropic_api_key, self.hyperbolic_api_key,
-                    self.openai_api_key, self.gemini_api_key]):
-            missing.append("At least one LLM API key (ANTHROPIC/HYPERBOLIC/OPENAI/GEMINI)")
+                    self.gemini_api_key]):
+            missing.append("At least one LLM API key (ANTHROPIC/HYPERBOLIC/GEMINI)")
 
         # Check Snowflake configuration
         required = [

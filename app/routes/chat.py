@@ -113,7 +113,7 @@ def set_model():
     Set the active LLM model.
 
     Request body:
-        {"model": "claude-sonnet" | "llama-3.3-70b" | "deepseek-v3" | "gpt-4o" | "gemini"}
+        {"model": "claude-sonnet" | "llama-3.3-70b" | "deepseek-v3" | "gemini"}
 
     Response:
         {"success": true, "model": "selected-model-name"}
@@ -130,7 +130,6 @@ def set_model():
         "claude-sonnet": "claude-sonnet-4-5-20250929",
         "llama-3.3-70b": "meta-llama/Llama-3.3-70B-Instruct",
         "deepseek-v3": "deepseek-ai/DeepSeek-V3",
-        "gpt-4o": "gpt-4o",
         "gemini": "gemini-2.0-flash-exp"
     }
 
