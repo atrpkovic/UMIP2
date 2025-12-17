@@ -362,6 +362,47 @@ header .subtitle {
 [data-theme="dark"] .theme-toggle .sun { display: block; }
 [data-theme="dark"] .theme-toggle .moon { display: none; }
 
+/* Model Selector */
+.model-selector-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.model-selector-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.model-selector {
+    padding: 8px 12px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.15s;
+    outline: none;
+}
+
+.model-selector:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--accent);
+}
+
+.model-selector:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-light);
+}
+
+.model-selector option {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
 /* Messages area */
 main#messages {
     flex: 1;

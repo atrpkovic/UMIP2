@@ -53,6 +53,16 @@
                     <span class="subtitle">Priority Tire Marketing Intelligence</span>
                 </div>
                 <div class="header-right">
+                    <div class="model-selector-wrapper">
+                        <label for="model-selector" class="model-selector-label">Choose AI Model:</label>
+                        <select class="model-selector" id="model-selector" title="Select AI Model">
+                            <option value="claude-sonnet">Claude Sonnet</option>
+                            <option value="llama-3.3-70b">Llama 3.3 - 70B</option>
+                            <option value="deepseek-v3" selected>DeepSeek-V3</option>
+                            <option value="gpt-4o">ChatGPT 4o-mini</option>
+                            <option value="gemini">Gemini 3</option>
+                        </select>
+                    </div>
                     <button class="theme-toggle" id="theme-toggle" title="Toggle theme">
                         <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
@@ -315,6 +325,45 @@
             localStorage.setItem('theme', next);
         });
 
+        // Model selector
+        const modelSelector = document.getElementById('model-selector');
+        const savedModel = localStorage.getItem('selected-model') || 'deepseek-v3';
+        modelSelector.value = savedModel;
+
+        // Set initial model on page load
+        (async () => {
+            try {
+                await fetch('/api/model', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ model: savedModel })
+                });
+            } catch (error) {
+                console.error('Error setting initial model:', error);
+            }
+        })();
+
+        modelSelector.addEventListener('change', async () => {
+            const selectedModel = modelSelector.value;
+            localStorage.setItem('selected-model', selectedModel);
+
+            try {
+                const response = await fetch('/api/model', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ model: selectedModel })
+                });
+
+                if (response.ok) {
+                    console.log('Model changed to:', selectedModel);
+                } else {
+                    console.error('Failed to change model');
+                }
+            } catch (error) {
+                console.error('Error changing model:', error);
+            }
+        });
+
         // Sidebar toggle
         sidebarToggle.addEventListener('click', () => {
             sidebar.classList.toggle('collapsed');
@@ -510,7 +559,9 @@
                         legend: {
                             position: 'top',
                             labels: {
-                                color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim()
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                                padding: 15,
+                                font: { size: 12 }
                             }
                         },
                         tooltip: {
@@ -520,27 +571,50 @@
                     },
                     scales: {
                         x: {
+                            offset: true,
                             ticks: {
-                                color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim()
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim(),
+                                maxRotation: 45,
+                                minRotation: 0
                             },
                             grid: {
-                                color: getComputedStyle(document.documentElement).getPropertyValue('--border-color').trim()
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--border-color').trim(),
+                                display: true
                             }
                         },
                         y: {
                             beginAtZero: true,
                             ticks: {
-                                color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim()
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim(),
+                                padding: 10
                             },
                             grid: {
                                 color: getComputedStyle(document.documentElement).getPropertyValue('--border-color').trim()
                             }
                         }
                     },
+                    elements: {
+                        point: {
+                            radius: 4,
+                            hoverRadius: 6,
+                            hitRadius: 10
+                        },
+                        line: {
+                            borderWidth: 2
+                        }
+                    },
                     interaction: {
                         mode: 'nearest',
                         axis: 'x',
                         intersect: false
+                    },
+                    layout: {
+                        padding: {
+                            left: 10,
+                            right: 10,
+                            top: 10,
+                            bottom: 10
+                        }
                     }
                 }
             });

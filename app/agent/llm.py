@@ -1,20 +1,49 @@
-"""Hyperbolic API client wrapper for Llama models."""
+"""Multi-provider LLM client supporting Claude, Llama, ChatGPT, and Gemini."""
 
 from openai import OpenAI
+from anthropic import Anthropic
+import google.generativeai as genai
 from config import settings
 
 
 class LLMClient:
-    """Wrapper for Hyperbolic API (OpenAI-compatible) with Llama models."""
+    """Wrapper for multiple LLM providers with unified interface."""
 
-    MAX_TOKENS = 2048
+    MAX_TOKENS = 4096
 
     def __init__(self):
-        self.client = OpenAI(
+        # Initialize all providers
+        self.anthropic_client = Anthropic(api_key=settings.anthropic_api_key)
+        self.hyperbolic_client = OpenAI(
             api_key=settings.hyperbolic_api_key,
             base_url="https://api.hyperbolic.xyz/v1"
         )
+        self.openai_client = OpenAI(api_key=settings.openai_api_key)
+        genai.configure(api_key=settings.gemini_api_key)
+
+        # Default to current .env model
+        self.current_provider = "hyperbolic"
         self.model = settings.llm_model
+
+    def set_model(self, model_key: str, model_identifier: str):
+        """
+        Switch the active LLM model and provider.
+
+        Args:
+            model_key: Frontend key ('claude-sonnet', 'llama-3.3-70b', etc.)
+            model_identifier: Actual model identifier for API
+        """
+        self.model = model_identifier
+
+        # Determine provider based on model_key
+        if model_key == "claude-sonnet":
+            self.current_provider = "anthropic"
+        elif model_key in ["llama-3.3-70b", "deepseek-v3"]:
+            self.current_provider = "hyperbolic"
+        elif model_key == "gpt-4o":
+            self.current_provider = "openai"
+        elif model_key == "gemini":
+            self.current_provider = "gemini"
 
     def generate(
         self,
@@ -23,33 +52,89 @@ class LLMClient:
         conversation_history: list[dict] | None = None
     ) -> str:
         """
-        Generate a response from Llama via Hyperbolic.
+        Generate a response using the currently selected LLM provider.
 
         Args:
             user_message: The user's current message
             system_prompt: System instructions for the model
             conversation_history: Optional list of previous messages
-                                  [{"role": "user"|"assistant", "content": "..."}]
 
         Returns:
             The assistant's response text
         """
-        messages = [{"role": "system", "content": system_prompt}]
+        if self.current_provider == "anthropic":
+            return self._generate_anthropic(user_message, system_prompt, conversation_history)
+        elif self.current_provider == "gemini":
+            return self._generate_gemini(user_message, system_prompt, conversation_history)
+        else:  # hyperbolic or openai (both use OpenAI-compatible API)
+            return self._generate_openai_compatible(user_message, system_prompt, conversation_history)
 
-        # Add conversation history if provided
+    def _generate_openai_compatible(
+        self,
+        user_message: str,
+        system_prompt: str,
+        conversation_history: list[dict] | None = None
+    ) -> str:
+        """Generate using OpenAI-compatible API (Hyperbolic, OpenAI)."""
+        client = self.hyperbolic_client if self.current_provider == "hyperbolic" else self.openai_client
+
+        messages = [{"role": "system", "content": system_prompt}]
         if conversation_history:
             messages.extend(conversation_history)
-
-        # Add the current user message
         messages.append({"role": "user", "content": user_message})
 
-        response = self.client.chat.completions.create(
+        response = client.chat.completions.create(
             model=self.model,
             max_tokens=self.MAX_TOKENS,
             messages=messages
         )
 
         return response.choices[0].message.content
+
+    def _generate_anthropic(
+        self,
+        user_message: str,
+        system_prompt: str,
+        conversation_history: list[dict] | None = None
+    ) -> str:
+        """Generate using Anthropic Claude API."""
+        messages = []
+        if conversation_history:
+            messages.extend(conversation_history)
+        messages.append({"role": "user", "content": user_message})
+
+        response = self.anthropic_client.messages.create(
+            model=self.model,
+            max_tokens=self.MAX_TOKENS,
+            system=system_prompt,
+            messages=messages
+        )
+
+        return response.content[0].text
+
+    def _generate_gemini(
+        self,
+        user_message: str,
+        system_prompt: str,
+        conversation_history: list[dict] | None = None
+    ) -> str:
+        """Generate using Google Gemini API."""
+        model = genai.GenerativeModel(
+            model_name=self.model,
+            system_instruction=system_prompt
+        )
+
+        # Build conversation context
+        chat_context = []
+        if conversation_history:
+            for msg in conversation_history:
+                role = "user" if msg["role"] == "user" else "model"
+                chat_context.append({"role": role, "parts": [msg["content"]]})
+
+        chat = model.start_chat(history=chat_context)
+        response = chat.send_message(user_message)
+
+        return response.text
 
     def generate_stream(
         self,
@@ -58,7 +143,7 @@ class LLMClient:
         conversation_history: list[dict] | None = None
     ):
         """
-        Stream a response from Llama via Hyperbolic in real-time.
+        Stream a response using the currently selected LLM provider.
 
         Args:
             user_message: The user's current message
@@ -66,19 +151,30 @@ class LLMClient:
             conversation_history: Optional list of previous messages
 
         Yields:
-            Text tokens as they arrive from Llama
+            Text tokens as they arrive
         """
-        messages = [{"role": "system", "content": system_prompt}]
+        if self.current_provider == "anthropic":
+            yield from self._generate_stream_anthropic(user_message, system_prompt, conversation_history)
+        elif self.current_provider == "gemini":
+            yield from self._generate_stream_gemini(user_message, system_prompt, conversation_history)
+        else:  # hyperbolic or openai
+            yield from self._generate_stream_openai_compatible(user_message, system_prompt, conversation_history)
 
-        # Add conversation history if provided
+    def _generate_stream_openai_compatible(
+        self,
+        user_message: str,
+        system_prompt: str,
+        conversation_history: list[dict] | None = None
+    ):
+        """Stream using OpenAI-compatible API (Hyperbolic, OpenAI)."""
+        client = self.hyperbolic_client if self.current_provider == "hyperbolic" else self.openai_client
+
+        messages = [{"role": "system", "content": system_prompt}]
         if conversation_history:
             messages.extend(conversation_history)
-
-        # Add the current user message
         messages.append({"role": "user", "content": user_message})
 
-        # Stream response from Hyperbolic
-        stream = self.client.chat.completions.create(
+        stream = client.chat.completions.create(
             model=self.model,
             max_tokens=self.MAX_TOKENS,
             messages=messages,
@@ -88,6 +184,51 @@ class LLMClient:
         for chunk in stream:
             if chunk.choices[0].delta.content:
                 yield chunk.choices[0].delta.content
+
+    def _generate_stream_anthropic(
+        self,
+        user_message: str,
+        system_prompt: str,
+        conversation_history: list[dict] | None = None
+    ):
+        """Stream using Anthropic Claude API."""
+        messages = []
+        if conversation_history:
+            messages.extend(conversation_history)
+        messages.append({"role": "user", "content": user_message})
+
+        with self.anthropic_client.messages.stream(
+            model=self.model,
+            max_tokens=self.MAX_TOKENS,
+            system=system_prompt,
+            messages=messages
+        ) as stream:
+            for text in stream.text_stream:
+                yield text
+
+    def _generate_stream_gemini(
+        self,
+        user_message: str,
+        system_prompt: str,
+        conversation_history: list[dict] | None = None
+    ):
+        """Stream using Google Gemini API."""
+        model = genai.GenerativeModel(
+            model_name=self.model,
+            system_instruction=system_prompt
+        )
+
+        chat_context = []
+        if conversation_history:
+            for msg in conversation_history:
+                role = "user" if msg["role"] == "user" else "model"
+                chat_context.append({"role": role, "parts": [msg["content"]]})
+
+        chat = model.start_chat(history=chat_context)
+        response = chat.send_message(user_message, stream=True)
+
+        for chunk in response:
+            yield chunk.text
     
     def generate_with_retry(
         self,

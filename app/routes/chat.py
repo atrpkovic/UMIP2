@@ -105,3 +105,39 @@ def get_schema():
     """Return the current schema documentation (for debugging)."""
     from app.database.schema import get_schema_documentation
     return jsonify({"schema": get_schema_documentation()})
+
+
+@chat_bp.route("/model", methods=["POST"])
+def set_model():
+    """
+    Set the active LLM model.
+
+    Request body:
+        {"model": "claude-sonnet" | "llama-3.3-70b" | "deepseek-v3" | "gpt-4o" | "gemini"}
+
+    Response:
+        {"success": true, "model": "selected-model-name"}
+    """
+    data = request.get_json()
+
+    if not data or "model" not in data:
+        return jsonify({"error": "Missing 'model' in request body"}), 400
+
+    model_key = data["model"]
+
+    # Map frontend model keys to actual model identifiers
+    model_mapping = {
+        "claude-sonnet": "claude-sonnet-4-5-20250929",
+        "llama-3.3-70b": "meta-llama/Llama-3.3-70B-Instruct",
+        "deepseek-v3": "deepseek-ai/DeepSeek-V3",
+        "gpt-4o": "gpt-4o",
+        "gemini": "gemini-2.0-flash-exp"
+    }
+
+    if model_key not in model_mapping:
+        return jsonify({"error": f"Invalid model: {model_key}"}), 400
+
+    # Update the agent's model
+    agent.set_model(model_key, model_mapping[model_key])
+
+    return jsonify({"success": True, "model": model_key})

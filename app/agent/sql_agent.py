@@ -18,6 +18,16 @@ class SQLAgent:
         self.db = SnowflakeClient()
         self.schema_docs = get_schema_documentation()
         self.system_prompt = build_system_prompt(self.schema_docs)
+
+    def set_model(self, model_key: str, model_identifier: str):
+        """
+        Switch the active LLM model.
+
+        Args:
+            model_key: Frontend model key (e.g., 'claude-sonnet', 'deepseek-v3')
+            model_identifier: Actual model identifier for the API
+        """
+        self.llm.set_model(model_key, model_identifier)
     
     def ask(self, question: str) -> dict:
         """

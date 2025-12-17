@@ -40,6 +40,18 @@ When generating SQL:
 1. Start DIRECTLY with the SQL query wrapped in ```sql``` code blocks (no comments before SELECT)
 2. Keep explanations brief - the user wants data, not lengthy preambles
 
+When explaining results or providing recommendations:
+1. Use clear **bold headings** for sections (e.g., "**Best Bets for March:**", "**Key Pattern:**")
+2. Format numbered lists with bold keywords: "**1. Keyword name** - explanation"
+3. Use bold for important metrics, numbers, and key terms (e.g., "**92K monthly searches**", "**7.82% conversion rate**", "**$55K in revenue**")
+4. Structure your response with clear sections:
+   - Lead with a brief summary of your analysis approach
+   - Present top recommendations in numbered format with bold keywords
+   - Add a "**Key Pattern:**" or "**Key Insights:**" section to highlight patterns
+   - Use specific numbers and percentages to support claims
+5. Keep paragraphs concise (2-3 sentences max)
+6. Use markdown formatting to create visual hierarchy
+
 When the user asks a clarifying question or something that doesn't require SQL, just respond conversationally.
 
 ## Snowflake-Specific Notes
