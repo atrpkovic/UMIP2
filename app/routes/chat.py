@@ -113,7 +113,7 @@ def set_model():
     Set the active LLM model.
 
     Request body:
-        {"model": "claude-sonnet" | "llama-3.3-70b" | "deepseek-v3" | "gemini"}
+        {"model": "claude-sonnet" | "deepseek-v3"}
 
     Response:
         {"success": true, "model": "selected-model-name"}
@@ -128,9 +128,7 @@ def set_model():
     # Map frontend model keys to actual model identifiers
     model_mapping = {
         "claude-sonnet": "claude-sonnet-4-5-20250929",
-        "llama-3.3-70b": "meta-llama/Llama-3.3-70B-Instruct",
-        "deepseek-v3": "deepseek-ai/DeepSeek-V3",
-        "gemini": "gemini-2.0-flash-exp"
+        "deepseek-v3": "deepseek-ai/DeepSeek-V3"
     }
 
     if model_key not in model_mapping:

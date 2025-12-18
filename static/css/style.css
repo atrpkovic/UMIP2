@@ -7,9 +7,9 @@
 :root {
     /* Priority Tire Brand Colors */
     --accent: #F2A61D;
-    --accent-hover: #d99418;
+    --accent-hover: #9E6B12;
     --accent-light: rgba(242, 166, 29, 0.1);
-    
+
     /* Light Mode */
     --bg-primary: #f9fafb;
     --bg-secondary: #ffffff;
@@ -26,18 +26,18 @@
 }
 
 [data-theme="dark"] {
-    --bg-primary: #0f172a;
-    --bg-secondary: #1e293b;
-    --bg-tertiary: #334155;
-    --bg-assistant: #1e293b;
-    --text-primary: #f1f5f9;
-    --text-secondary: #94a3b8;
+    --bg-primary: #1F2326;
+    --bg-secondary: #121212;
+    --bg-tertiary: #2D2D2D;
+    --bg-assistant: #2D2D2D;
+    --text-primary: #E0E0E0;
+    --text-secondary: #9E9E9E;
     --text-user: #ffffff;
-    --border-color: #334155;
-    --code-bg: #0f172a;
-    --code-text: #e2e8f0;
-    --shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-    --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.5);
+    --border-color: #3D3D3D;
+    --code-bg: #121212;
+    --code-text: #E0E0E0;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.6);
 }
 
 html, body {

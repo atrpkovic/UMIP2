@@ -1,8 +1,7 @@
-"""Multi-provider LLM client supporting Claude, Llama, and Gemini."""
+"""Multi-provider LLM client supporting Claude and DeepSeek."""
 
 from openai import OpenAI
 from anthropic import Anthropic
-import google.generativeai as genai
 from config import settings
 
 
@@ -18,7 +17,6 @@ class LLMClient:
             api_key=settings.hyperbolic_api_key,
             base_url="https://api.hyperbolic.xyz/v1"
         )
-        genai.configure(api_key=settings.gemini_api_key)
 
         # Default to current .env model
         self.current_provider = "hyperbolic"
@@ -29,7 +27,7 @@ class LLMClient:
         Switch the active LLM model and provider.
 
         Args:
-            model_key: Frontend key ('claude-sonnet', 'llama-3.3-70b', etc.)
+            model_key: Frontend key ('claude-sonnet', 'deepseek-v3')
             model_identifier: Actual model identifier for API
         """
         self.model = model_identifier
@@ -37,10 +35,8 @@ class LLMClient:
         # Determine provider based on model_key
         if model_key == "claude-sonnet":
             self.current_provider = "anthropic"
-        elif model_key in ["llama-3.3-70b", "deepseek-v3"]:
+        elif model_key == "deepseek-v3":
             self.current_provider = "hyperbolic"
-        elif model_key == "gemini":
-            self.current_provider = "gemini"
 
     def generate(
         self,
@@ -61,8 +57,6 @@ class LLMClient:
         """
         if self.current_provider == "anthropic":
             return self._generate_anthropic(user_message, system_prompt, conversation_history)
-        elif self.current_provider == "gemini":
-            return self._generate_gemini(user_message, system_prompt, conversation_history)
         else:  # hyperbolic (uses OpenAI-compatible API)
             return self._generate_hyperbolic(user_message, system_prompt, conversation_history)
 
@@ -107,30 +101,6 @@ class LLMClient:
 
         return response.content[0].text
 
-    def _generate_gemini(
-        self,
-        user_message: str,
-        system_prompt: str,
-        conversation_history: list[dict] | None = None
-    ) -> str:
-        """Generate using Google Gemini API."""
-        model = genai.GenerativeModel(
-            model_name=self.model,
-            system_instruction=system_prompt
-        )
-
-        # Build conversation context
-        chat_context = []
-        if conversation_history:
-            for msg in conversation_history:
-                role = "user" if msg["role"] == "user" else "model"
-                chat_context.append({"role": role, "parts": [msg["content"]]})
-
-        chat = model.start_chat(history=chat_context)
-        response = chat.send_message(user_message)
-
-        return response.text
-
     def generate_stream(
         self,
         user_message: str,
@@ -150,8 +120,6 @@ class LLMClient:
         """
         if self.current_provider == "anthropic":
             yield from self._generate_stream_anthropic(user_message, system_prompt, conversation_history)
-        elif self.current_provider == "gemini":
-            yield from self._generate_stream_gemini(user_message, system_prompt, conversation_history)
         else:  # hyperbolic
             yield from self._generate_stream_hyperbolic(user_message, system_prompt, conversation_history)
 
@@ -199,30 +167,6 @@ class LLMClient:
             for text in stream.text_stream:
                 yield text
 
-    def _generate_stream_gemini(
-        self,
-        user_message: str,
-        system_prompt: str,
-        conversation_history: list[dict] | None = None
-    ):
-        """Stream using Google Gemini API."""
-        model = genai.GenerativeModel(
-            model_name=self.model,
-            system_instruction=system_prompt
-        )
-
-        chat_context = []
-        if conversation_history:
-            for msg in conversation_history:
-                role = "user" if msg["role"] == "user" else "model"
-                chat_context.append({"role": role, "parts": [msg["content"]]})
-
-        chat = model.start_chat(history=chat_context)
-        response = chat.send_message(user_message, stream=True)
-
-        for chunk in response:
-            yield chunk.text
-    
     def generate_with_retry(
         self,
         user_message: str,

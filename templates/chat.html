@@ -57,9 +57,7 @@
                         <label for="model-selector" class="model-selector-label">Choose AI Model:</label>
                         <select class="model-selector" id="model-selector" title="Select AI Model">
                             <option value="claude-sonnet">Claude Sonnet</option>
-                            <option value="llama-3.3-70b">Llama 3.3 - 70B</option>
                             <option value="deepseek-v3">DeepSeek-V3</option>
-                            <option value="gemini">Gemini 3</option>
                         </select>
                     </div>
                     <button class="theme-toggle" id="theme-toggle" title="Toggle theme">
@@ -184,22 +182,6 @@
                         </div>
                         <strong style="font-size: 14px; color: var(--text-primary); margin-bottom: 4px;">DeepSeek-V3</strong>
                         <span style="font-size: 11px; color: var(--text-secondary); line-height: 1.3;">Fast & cost-effective</span>
-                    </label>
-                    <label class="model-option" data-value="llama-3.3-70b" style="display: flex; flex-direction: column; align-items: center; padding: 20px 16px; border: 2px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: all 0.2s; text-align: center; background: var(--bg-primary);">
-                        <input type="radio" name="initial-model" value="llama-3.3-70b" style="display: none;">
-                        <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); display: flex; align-items: center; justify-content: center; margin-bottom: 12px;">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10H12V2z"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>
-                        </div>
-                        <strong style="font-size: 14px; color: var(--text-primary); margin-bottom: 4px;">Llama 3.3 70B</strong>
-                        <span style="font-size: 11px; color: var(--text-secondary); line-height: 1.3;">Open-source, balanced</span>
-                    </label>
-                    <label class="model-option" data-value="gemini" style="display: flex; flex-direction: column; align-items: center; padding: 20px 16px; border: 2px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: all 0.2s; text-align: center; background: var(--bg-primary);">
-                        <input type="radio" name="initial-model" value="gemini" style="display: none;">
-                        <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); display: flex; align-items: center; justify-content: center; margin-bottom: 12px;">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                        </div>
-                        <strong style="font-size: 14px; color: var(--text-primary); margin-bottom: 4px;">Gemini 3</strong>
-                        <span style="font-size: 11px; color: var(--text-secondary); line-height: 1.3;">Google's latest model</span>
                     </label>
                 </div>
                 <button class="btn-primary" id="model-confirm-btn" disabled style="width: 100%; margin-top: 20px; padding: 14px; font-size: 15px; font-weight: 600; border-radius: 10px;">Get Started</button>

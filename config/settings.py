@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+
 class Settings:
     """Application configuration loaded from environment variables."""
     
@@ -11,9 +12,8 @@ class Settings:
         # LLM Providers
         self.anthropic_api_key = os.getenv("ANTHROPIC_API_KEY")
         self.hyperbolic_api_key = os.getenv("HYPERBOLIC_API_KEY")
-        self.gemini_api_key = os.getenv("GEMINI_API_KEY")
         # Default model
-        self.llm_model = os.getenv("LLM_MODEL", "meta-llama/Llama-3.3-70B-Instruct")
+        self.llm_model = os.getenv("LLM_MODEL", "deepseek-ai/DeepSeek-V3")
 
         # Snowflake
         self.snowflake_account = os.getenv("SNOWFLAKE_ACCOUNT")
@@ -44,9 +44,8 @@ class Settings:
         missing = []
 
         # Check for at least one LLM provider
-        if not any([self.anthropic_api_key, self.hyperbolic_api_key,
-                    self.gemini_api_key]):
-            missing.append("At least one LLM API key (ANTHROPIC/HYPERBOLIC/GEMINI)")
+        if not any([self.anthropic_api_key, self.hyperbolic_api_key]):
+            missing.append("At least one LLM API key (ANTHROPIC/HYPERBOLIC)")
 
         # Check Snowflake configuration
         required = [
